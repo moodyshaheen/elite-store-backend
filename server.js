@@ -64,8 +64,18 @@ const getCorsOrigins = () => {
 }
 
 app.use(cors({
-  origin: getCorsOrigins(),
-  credentials: true
+  origin: [
+    'https://elite-store-frontend-new.surge.sh',
+    'https://elite-store-admin-new.surge.sh',
+    'https://elite-store-frontend.surge.sh',
+    'https://elite-store-admin.surge.sh',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }))
 
 // Serve uploaded files
