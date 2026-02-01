@@ -63,19 +63,52 @@ const getCorsOrigins = () => {
   }
 }
 
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
+// CORS Configuration - Allow all surge.sh domains
 app.use(cors({
-  origin: [
-    'https://elite-store-frontend-new.surge.sh',
-    'https://elite-store-admin-new.surge.sh',
-    'https://elite-store-frontend.surge.sh',
-    'https://elite-store-admin.surge.sh',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3000'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow all surge.sh domains
+    if (origin.includes('.surge.sh') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Allow specific domains
+    const allowedOrigins = [
+      'https://elite-store-frontend-new.surge.sh',
+      'https://elite-store-admin-new.surge.sh',
+      'https://elite-store-frontend.surge.sh',
+      'https://elite-store-admin.surge.sh'
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // For development, allow everything
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }))
 
 // Serve uploaded files
